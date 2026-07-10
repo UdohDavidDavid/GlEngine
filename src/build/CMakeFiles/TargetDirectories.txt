@@ -1,0 +1,3 @@
+/home/david/c++/opengl/opengl/src/build/CMakeFiles/main.dir
+/home/david/c++/opengl/opengl/src/build/CMakeFiles/edit_cache.dir
+/home/david/c++/opengl/opengl/src/build/CMakeFiles/rebuild_cache.dir

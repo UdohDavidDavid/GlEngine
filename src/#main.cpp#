@@ -1,0 +1,545 @@
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
+#include <iostream>
+#include <cmath>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <math.h>
+#include <string>
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "settings.h"
+#include "shaders.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "stb_image.h"
+#include "camera.h"
+#include "light_vertices.h"
+#include "rubix_vertices.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "materials.h"
+#include "imgizmo/ImGuizmo.h"
+#include "window.h"
+#include "renderer.h"
+#include "functions.h"
+#include "assets.h"
+#include "mesh.h"
+#include "scene.h"
+#include "light.h"
+#include "light_vertices.h"
+#include <iostream>
+#include <vector>
+
+
+int main(int argc, char **argv) {
+
+    std::cout << "Here" << std::endl;
+
+    Window window(Settings::WindowWidth, Settings::WindowHeight, Settings::WindowTitle);
+    if (!window.Initialize()) return -1;
+
+    Renderer renderer;
+    if (!renderer.init()) return -1;
+
+    // Overlay overlay(window.getGLFWwindow());
+    // overlay.init();
+
+    Camera camera;
+    window.addCamera(&camera);
+
+    // Create Shader
+    Shader shader("./shaders/steelVertex.glsl", "./shaders/steelFragment.glsl");
+    // Shader lightingShader("./shaders/lightVertex.glsl", "./shaders/lightFragment.glsl");
+    // Shader rubixShader("./shaders/rubixVertex.glsl", "./shaders/rubixFragment.glsl");
+    // Shader steelShader("./shaders/steelVertex.glsl", "./shaders/steelFragment.glsl");
+
+    // Texture rubix("./images/rubiks_cube_41_90_diffuse.jpg");
+    // Texture rubix_specular("./images/rubix_specular_map.png");
+    // Texture container2("./images/container2.png");
+    // Texture container2_specular("./images/container2_specular.png");
+    
+    unsigned int rubix = loadTextureFromFile("./images/rubiks_cube_41_90_diffuse.jpg");
+    unsigned int rubix_specular = loadTextureFromFile("./images/rubix_specular_map.png");
+
+    unsigned int steelContainer = loadTextureFromFile("./images/container2.png");
+    unsigned int steelContainerSpecular = loadTextureFromFile("./images/container2_specular.png");
+
+
+
+    std::vector<unsigned int> materialTextureAmbienceID;
+    materialTextureAmbienceID.reserve(24);
+    std::vector<unsigned int> materialTextureDiffuseID;
+    materialTextureDiffuseID.reserve(24);
+    std::vector<unsigned int> materialTextureSpecularID;
+    materialTextureSpecularID.reserve(24);
+
+    for (int i = 0; i < 24; ++i)
+    {
+        materialTextureAmbienceID.push_back(loadTextureFromColor(materialValues[i].ambient));
+
+        materialTextureDiffuseID.push_back(loadTextureFromColor(materialValues[i].diffuse));
+
+        materialTextureSpecularID.push_back(loadTextureFromColor(materialValues[i].specular));
+    }
+
+    
+    // VertexLayout layout;
+    // // Index, Count, Type, Size of Type, Offset byte position
+    // layout.AddAttribute(0, 3, GL_FLOAT, sizeof(float), 0);                      // Position
+    // layout.AddAttribute(1, 3, GL_FLOAT, sizeof(float), 3 * sizeof(float));      // Normal
+    // layout.AddAttribute(2, 2, GL_FLOAT, sizeof(float), 6 * sizeof(float));      // UVs
+    // // Send it to your VAO
+    // VBO vbo(rubixVertices, sizeof(rubixVertices));
+    // VAO vao(vbo, layout);
+    // VBO vbo2(lightVertices, sizeof(lightVertices));
+    // VAO vao2(vbo2, layout);
+    // VBO lightvbo(rubixVertices, sizeof(rubixVertices));
+    // VAO lightvao(vbo, layout);
+
+
+
+
+    // COLORS
+    // glm::vec3 coral(1.0f, 0.498f, 0.498f);
+    // glm::vec3 white(1.0f, 1.0f, 1.0f);
+    // glm::vec3 lightColor(white);
+    //
+    // float lightAngle = 0.0f; // Stores the accumulated angle of the light
+    // float rotationSpeed = 0.5f; // Adjust this to make it rotate faster or slow
+    //
+    //
+    // float diffuseIntensity = (float)DEFAULT_DIFFUSE;
+    // float ambientIntensity = (float)DEFAULT_AMBIENCE;
+    //
+    // glm::vec3 finalPos(-3.5, 4.0f, 10.0f);
+    // glm::vec3 rubixPos(-7.8f, 2.5, 7.0f);
+    // glm::vec3 steelPos(-6.8f, 2.5, 10.0f);
+    //
+    // glm::vec3 lightDir(-0.2f, -1.0f, -0.3f);
+    //
+    // // Stores the background color (R, G, B, A)
+    // glm::vec4 background = glm::vec4(0.098f, 0.098f, 0.098f, 1.0f);
+
+    float deltaTime = 0.0f;	// Time between current frame and last frame
+    float lastFrame = 0.0f; // Time of last frame
+    // float lastX = 400, lastY = 300;
+    // bool firstMouse = true;
+    // Camera camera;
+    // float fov = 60.0f;
+
+    // Render loop
+    while(!glfwWindowShouldClose(window.getGLFWwindow()))
+    {
+        glfwPollEvents();
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;  
+
+        float fps = 1.0f / deltaTime;
+
+        processInput(window.getGLFWwindow(), camera, deltaTime);
+        // std::cout << camera.Position.x << std::endl;
+        // mouse_callback(window, lastX, lastY);
+
+
+        // light properties
+        // glm::vec3 diffuseColor = lightColor   * glm::vec3(diffuseIntensity); 
+        // glm::vec3 ambientColor = diffuseColor * glm::vec3(ambientIntensity); 
+
+        // Start the Dear ImGui frame
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui::NewFrame();
+
+        // Create your GUI window
+        // ImGui::Begin("Debug");
+        // // ImGui::Text(std::to_string(1.0f / deltaTime).c_str());
+        // ImGui::Text("FPS: %.1f | Camera Pos: X: %.2f | Y: %.2f | Z: %.2f", 1.0f / deltaTime, camera.Position.x, camera.Position.y, camera.Position.z);
+        // ImGui::ColorEdit3("clear color", (float*)&lightColor); // Edit 3 floats representing a color
+        //                                                        // This creates a dedicated color picker/slider row
+        // ImGui::ColorEdit4("Background Color", &background.x);
+        // if (ImGui::Button("Clear SkyBox"))
+        //     background = {0.098f, 0.098f, 0.098f, 1.0f};
+        //
+        // // Edit all 3 components (X, Y, Z) of the light position at once
+        // ImGui::SliderFloat3("Light Position", &finalPos.x, -10.0f, 10.0f);
+        // ImGui::SliderFloat3("Light Direction", &lightDir.x, -10.0f, 10.0f);
+        // ImGui::SliderFloat3("Rubix Position", &rubixPos.x, -15.0f, 15.0f);
+        //
+        // static bool isAnimated = false;
+        // ImGui::Checkbox("Animate Color", &isAnimated);
+        // if (isAnimated)
+        // {
+        //     changeColors(&lightColor);
+        // }
+        // if (ImGui::Button("Clear Color"))
+        //     clearColors(&lightColor);
+        //
+        // static bool isRotating = true;
+        // ImGui::Checkbox("Rotate Cube", &isRotating);
+        //
+        // ImGui::SliderFloat("ambience", &ambientIntensity, 0.0f, 1.0f);
+        // if (ImGui::Button("Default Ambience"))
+        //     ambientIntensity = (float)DEFAULT_AMBIENCE;
+        // ImGui::SliderFloat("diffuse", &diffuseIntensity, 0.0f, 1.0f);
+        // if (ImGui::Button("Default diffuse"))
+        //     diffuseIntensity = (float)DEFAULT_DIFFUSE;
+        //
+        //
+        //
+        // ImGui::End();
+        //
+        //
+        //
+        // // 1. Right after calling ImGui::NewFrame(), initialize ImGuizmo
+        // ImGuizmo::BeginFrame();
+        //
+        int width, height;
+        glfwGetFramebufferSize(window.getGLFWwindow(), &width, &height);
+        float aspectRatio = calc_aspect_ratio(width, height);
+        //
+        // // Now you can pass them to ImGuizmo (cast them to floats)
+        // ImGuizmo::SetRect(0, 0, (float)width, (float)height);
+
+
+        renderer.draw();
+
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Draw in wireframe mode
+
+        shader.use();
+
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(Settings::FOV), aspectRatio, 0.1f, 100.0f);
+        glm::mat4 view;
+        view = camera.GetViewMatrix();
+        shader.setMVP(model, view, projection);
+
+        // glm::vec3 lightDir(-0.2f, -1.0f, -0.3f);
+        glm::vec3 lightDir(3.0f, 2.0f, -10.0f);
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        Dirlight dirlight(lightColor, lightDir, shader, camera);
+
+
+        // Mesh materialMesh(glm::vec3(0.0f, 0.0f, 0.0f), model);
+        Mesh rubixMesh(rubixVertices);
+        glm::mat4 rubixModel = glm::mat4(1.0f);
+        rubixModel = glm::translate(rubixModel, glm::vec3(-5.0f, 0.0f, 6.0f));
+        rubixModel = rotateModel(rubixModel, 2.5f, deltaTime);
+
+        shader.setMVP(rubixModel, view, projection);
+        shader.setFloat("material.shininess", 0.6);
+        rubixMesh.Draw(shader, rubix, rubix, rubix_specular);
+
+        Mesh containerMesh(vertices);
+        for (int i = 0; i < 11; ++i)
+        {
+            glm::mat4 containerModel = glm::mat4(1.0f);
+            float angle = 20.0f * i;
+            containerModel = glm::translate(containerModel, containerPositions[i]);
+            containerModel = glm::rotate(containerModel, angle, glm::vec3(0.4f, 0.2f, 1.0f));
+            shader.setMVP(containerModel, view, projection);
+            shader.setFloat("material.shininess", 0.6);
+            containerMesh.Draw(shader, steelContainer, steelContainer, steelContainerSpecular);
+        }
+
+	is this is
+        Mesh materialMesh(vertices);
+        for (int i = 0; i < 24; ++i)
+        {
+            glm::mat4 materialModel = glm::mat4(1.0f);
+            materialModel = glm::translate(materialModel, cubePositions[i]);
+            shader.setMVP(materialModel, view, projection);
+            float materialShininess = materialValues[i].shininess;
+            shader.setFloat("material.shininess", materialShininess);
+            materialMesh.Draw(shader, materialTextureAmbienceID[i], materialTextureDiffuseID[i], materialTextureSpecularID[i]);
+        }
+
+
+
+        // Rubix
+        // shader.use();
+        // // Set uniforms
+        // glUniform3f(glGetUniformLocation(shader.ID, "objectColor"), 1.0f, 0.5f, 0.31f);
+        // glUniform3fv(glGetUniformLocation(shader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
+        // glUniform3f(glGetUniformLocation(shader.ID, "lightPos"), 1.2f, 1.0f, 2.0f);
+        // glUniform3fv(glGetUniformLocation(shader.ID, "lightPos"), 1, glm::value_ptr(finalPos));
+        // glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
+        // glUniform3fv(glGetUniformLocation(shader.ID, "light.ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(shader.ID, "light.diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(shader.ID, "light.position"), 1, glm::value_ptr(finalPos));
+        //
+        // shader.setFloat("light.constant",  1.0f);
+        // shader.setFloat("light.linear",    0.045f);
+        // shader.setFloat("light.quadratic", 0.0075f);	    
+        // shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        //
+        //
+        // glm::mat4 projection;
+        // projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+        //
+        // glm::mat4 view;
+        // view = camera.GetViewMatrix();
+        //
+        // int viewLoc = glGetUniformLocation(shader.ID, "view");
+        // glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        // int projectionLoc = glGetUniformLocation(shader.ID, "projection");
+        // glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        //
+        // int number_of_cubes = 24;
+        // for (int i = 0; i < number_of_cubes; ++i)
+        // {
+        //     glm::mat4 model = glm::mat4(1.0f);
+        //     model = glm::translate(model, cubePositions[i]);
+        //     // if (isRotating)
+        //     //     model = glm::rotate(model, (float)glfwGetTime() * 3.0f, glm::vec3(sin(lightAngle), cos(lightAngle), 0.5f));
+        //     // model = glm::rotate(model, (float)glm::radians(90.0f), glm::vec3(1.0f, 10.0f, 0.5f));
+        //
+        //
+        //     int modelLoc = glGetUniformLocation(shader.ID, "model");
+        //     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        //
+        //     glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(materialValues[i].ambient));
+        //     glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(materialValues[i].diffuse));
+        //     glUniform3fv(glGetUniformLocation(shader.ID, "material.specular"), 1, glm::value_ptr(materialValues[i].specular));
+        //     shader.setFloat("material.shininess", materialValues[i].shininess);
+        //
+        //
+        //     glBindVertexArray(VAO);
+        //     glDrawArrays(GL_TRIANGLES, 0, 36);
+        //     glBindVertexArray(0);
+        // }
+        //
+        //
+        //
+        //
+        // // log_matrices(shader, model, view, projection);
+        //
+        //
+        // rubixShader.use();
+        // rubixShader.setInt("material.diffuse", 0);
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, rubix);
+        //
+        // rubixShader.setInt("material.specular", 1);
+        // glActiveTexture(GL_TEXTURE1);
+        // glBindTexture(GL_TEXTURE_2D, rubix_specular);
+        //
+        // glm::mat4 rubixmodel = glm::mat4(1.0f);
+        // rubixmodel = glm::translate(rubixmodel, rubixPos);
+        // if (isRotating)
+        // {
+        //     rubixmodel = glm::rotate(rubixmodel, (float)glfwGetTime() * 3.0f, glm::vec3(sin(lightAngle), cos(lightAngle), 0.5f));
+        // }
+        // glm::mat4 rubixprojection;
+        // rubixprojection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+        // glm::mat4 rubixview;
+        // rubixview = camera.GetViewMatrix();
+        //
+        // int rubixmodelLoc = glGetUniformLocation(rubixShader.ID, "model");
+        // glUniformMatrix4fv(rubixmodelLoc, 1, GL_FALSE, glm::value_ptr(rubixmodel));
+        // int rubixviewLoc = glGetUniformLocation(rubixShader.ID, "view");
+        // glUniformMatrix4fv(rubixviewLoc, 1, GL_FALSE, glm::value_ptr(rubixview));
+        // int rubixprojectionLoc = glGetUniformLocation(rubixShader.ID, "projection");
+        // glUniformMatrix4fv(rubixprojectionLoc, 1, GL_FALSE, glm::value_ptr(rubixprojection));
+        //
+        // // Set uniforms
+        // glUniform3f(glGetUniformLocation(rubixShader.ID, "objectColor"), 1.0f, 0.5f, 0.31f);
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
+        // glUniform3f(glGetUniformLocation(rubixShader.ID, "lightPos"), 1.2f, 1.0f, 2.0f);
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "lightPos"), 1, glm::value_ptr(finalPos));
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "light.ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "light.diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "material.specular"), 1, glm::value_ptr(glm::vec3(0.5f)));
+        // glUniform3fv(glGetUniformLocation(rubixShader.ID, "light.position"), 1, glm::value_ptr(finalPos));
+        // rubixShader.setFloat("material.shininess", 0.6f);
+        // rubixShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        //
+        // rubixShader.setFloat("light.constant",  1.0f);
+        // rubixShader.setFloat("light.linear",    0.045f);
+        // rubixShader.setFloat("light.quadratic", 0.0075f);	    
+        // rubixShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        //
+        // glBindVertexArray(VBO);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glBindVertexArray(0);
+        //
+        // // steel
+        // steelShader.use();
+        // steelShader.setInt("material.diffuse", 0); // or with shader class
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, steel);
+        // // glBindTexture(GL_TEXTURE_2D, rubix);
+        //
+        // steelShader.setInt("material.specular", 1); // or with shader class
+        // glActiveTexture(GL_TEXTURE1);
+        // glBindTexture(GL_TEXTURE_2D, container_specular);
+        // // glBindTexture(GL_TEXTURE_2D, rubix_specular);
+        //
+        // steelShader.setInt("material.emission", 4); // or with shader class
+        // glActiveTexture(GL_TEXTURE4);
+        // glBindTexture(GL_TEXTURE_2D, matrix);
+        // steelShader.setFloat("material.shininess", 0.6f);
+        //
+        //
+        // // Set uniforms
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "dirLight.ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "dirLight.diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "dirLight.specular"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "dirLight.direction"), 1, glm::value_ptr(lightDir));
+        //
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "spotLight.position"), 1, glm::value_ptr(camera.Position));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "spotLight.direction"), 1, glm::value_ptr(camera.Front));
+        // glUniform1f(glGetUniformLocation(steelShader.ID, "spotLight.innerCutOff"), glm::cos(glm::radians(12.5f)));
+        // glUniform1f(glGetUniformLocation(steelShader.ID, "spotLight.outerCutOff"), glm::cos(glm::radians(15.0f)));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "spotLight.ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "spotLight.diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "spotLight.specular"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        //
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[0].position"), 1, glm::value_ptr(pointLightPositions[0]));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[0].ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[0].diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[0].specular"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        // steelShader.setFloat("pointLights[0].constant",  1.0f);
+        // steelShader.setFloat("pointLights[0].linear",    0.045f);
+        // steelShader.setFloat("pointLights[0].quadratic", 0.0075f);	    
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[1].position"), 1, glm::value_ptr(pointLightPositions[1]));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[1].ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[1].diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[1].specular"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        // steelShader.setFloat("pointLights[1].constant",  1.0f);
+        // steelShader.setFloat("pointLights[1].linear",    0.045f);
+        // steelShader.setFloat("pointLights[1].quadratic", 0.0075f);	    
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[2].position"), 1, glm::value_ptr(pointLightPositions[2]));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[2].ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[2].diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[2].specular"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        // steelShader.setFloat("pointLights[2].constant",  1.0f);
+        // steelShader.setFloat("pointLights[2].linear",    0.045f);
+        // steelShader.setFloat("pointLights[2].quadratic", 0.0075f);	    
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[3].position"), 1, glm::value_ptr(pointLightPositions[3]));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[3].ambient"), 1, glm::value_ptr(ambientColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[3].diffuse"), 1, glm::value_ptr(diffuseColor));
+        // glUniform3fv(glGetUniformLocation(steelShader.ID, "pointLights[3].specular"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+        // steelShader.setFloat("pointLights[3].constant",  1.0f);
+        // steelShader.setFloat("pointLights[3].linear",    0.045f);
+        // steelShader.setFloat("pointLights[3].quadratic", 0.0075f);	    
+        //
+        //
+        // glm::mat4 steelprojection;
+        // steelprojection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+        // // steelprojection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f);
+        // glm::mat4 steelview;
+        // steelview = camera.GetViewMatrix();
+        //
+        // int steelviewLoc = glGetUniformLocation(steelShader.ID, "view");
+        // glUniformMatrix4fv(steelviewLoc, 1, GL_FALSE, glm::value_ptr(steelview));
+        // int steelprojectionLoc = glGetUniformLocation(steelShader.ID, "projection");
+        // glUniformMatrix4fv(steelprojectionLoc, 1, GL_FALSE, glm::value_ptr(steelprojection));
+        //
+        // for(unsigned int i = 0; i < 10; i++)
+        // {
+        //     glm::mat4 steelmodel = glm::mat4(1.0f);
+        //     steelmodel = glm::translate(steelmodel, containerPositions[i]);
+        //     float angle = 20.0f * i;
+        //     steelmodel = glm::rotate(steelmodel, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        //     int steelmodelLoc = glGetUniformLocation(steelShader.ID, "model");
+        //     glUniformMatrix4fv(steelmodelLoc, 1, GL_FALSE, glm::value_ptr(steelmodel));
+        //
+        //     // glDrawArrays(GL_TRIANGLES, 0, 36);
+        //     glBindVertexArray(lightVAO);
+        //     glDrawArrays(GL_TRIANGLES, 0, 36);
+        //     glBindVertexArray(0);
+        // }
+        //
+        //
+        // // Light
+        // lightingShader.use();
+        // lightingShader.setInt("glowstoneTexture", 0); // or with shader class
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, glowstone);
+        //
+        // glUniform3fv(glGetUniformLocation(lightingShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
+        //
+        //
+        // glm::mat4 lightmodel = glm::mat4(1.0f);
+        // lightmodel = glm::translate(lightmodel, finalPos);
+        // lightmodel = glm::scale(lightmodel, glm::vec3(0.2f));
+        // glm::mat4 lightprojection;
+        // lightprojection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+        // glm::mat4 lightview;
+        // lightview = camera.GetViewMatrix();
+        //
+        // float hitbox_size = 0.3f;
+        // imgizmo_hover_translate(window, finalPos, lightview, lightprojection, hitbox_size);
+        //
+        // int lightmodelLoc = glGetUniformLocation(lightingShader.ID, "model");
+        // glUniformMatrix4fv(lightmodelLoc, 1, GL_FALSE, glm::value_ptr(lightmodel));
+        // int lightviewLoc = glGetUniformLocation(lightingShader.ID, "view");
+        // glUniformMatrix4fv(lightviewLoc, 1, GL_FALSE, glm::value_ptr(lightview));
+        // int lightprojectionLoc = glGetUniformLocation(lightingShader.ID, "projection");
+        // glUniformMatrix4fv(lightprojectionLoc, 1, GL_FALSE, glm::value_ptr(lightprojection));
+        //
+        //
+        // // log_matrices(lightingShader, lightmodel, lightview, lightprojection);
+        //
+        //
+        // glBindVertexArray(lightVAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glBindVertexArray(0);
+        //
+        // // pointLight
+        // lightingShader.use();
+        // lightingShader.setInt("glowstoneTexture", 0); // or with shader class
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, glowstone);
+        //
+        // glUniform3fv(glGetUniformLocation(lightingShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
+        //
+        //
+        // glm::mat4 pointlightprojection;
+        // pointlightprojection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+        // glm::mat4 pointlightview;
+        // pointlightview = camera.GetViewMatrix();
+        //
+        //
+        // int pointlightviewLoc = glGetUniformLocation(lightingShader.ID, "view");
+        // glUniformMatrix4fv(pointlightviewLoc, 1, GL_FALSE, glm::value_ptr(pointlightview));
+        // int pointlightprojectionLoc = glGetUniformLocation(lightingShader.ID, "projection");
+        // glUniformMatrix4fv(pointlightprojectionLoc, 1, GL_FALSE, glm::value_ptr(pointlightprojection));
+        //
+        // for (int i = 0; i < 4; ++i)
+        // {
+        //     glm::mat4 pointlightmodel = glm::mat4(1.0f);
+        //     pointlightmodel = glm::translate(pointlightmodel, pointLightPositions[i]);
+        //     pointlightmodel = glm::scale(pointlightmodel, glm::vec3(0.2f));
+        //     int pointlightmodelLoc = glGetUniformLocation(lightingShader.ID, "model");
+        //     glUniformMatrix4fv(pointlightmodelLoc, 1, GL_FALSE, glm::value_ptr(pointlightmodel));
+        //
+        //     glBindVertexArray(lightVAO);
+        //     glDrawArrays(GL_TRIANGLES, 0, 36);
+        //     glBindVertexArray(0);
+        // }
+        //
+        //
+        // // log_matrices(lightingShader, lightmodel, lightview, lightprojection);
+        //
+        //
+        //
+        // // Rendering
+        // ImGui::Render();
+        // // Render ImGui data on top of your scene
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        glfwSwapBuffers(window.getGLFWwindow());
+    }
+
+    glfwTerminate();
+    return 0;
+}
+
