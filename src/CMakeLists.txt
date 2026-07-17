@@ -31,6 +31,8 @@ set(SOURCES
     vbo.cpp
     camera.cpp
     window.cpp
+    sphere.cpp
+    model.cpp
     imgui/imgui.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_widgets.cpp
@@ -47,7 +49,7 @@ add_executable(main ${SOURCES})
 add_compile_options(-g)
 
 # Link libraries (GL, glfw, and dl)
-target_link_libraries(main GL glfw dl)
+target_link_libraries(main GL glfw dl assimp)
 
 # Assuming you have a "shaders" folder and "textures" folder in your project root
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

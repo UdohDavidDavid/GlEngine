@@ -16,19 +16,28 @@ struct Vertex
     glm::vec2 TexCoords;
 };
 
+struct Texture
+{
+    unsigned int id;
+    std::string type;
+    std::string path;
+};
 
 
 class Mesh
 {
     public:
         std::vector<Vertex> vertices;
+        std::vector<Texture> textures;
+        std::vector<unsigned int> indices;
         glm::vec3 position;
 
-        Mesh(std::vector<Vertex> vertices, glm::vec3 position);
-        void Draw(Shader& shader, unsigned int ambience, unsigned int diffuse, unsigned int specular);
+        Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices, std::vector<Texture> &textures);
+        // void Draw(Shader& shader, unsigned int ambience, unsigned int diffuse, unsigned int specular);
+        void Draw(Shader& shader);
         void setPositioon(glm::vec3 position);
     private:
-        unsigned int VBO, VAO;
+        unsigned int VBO, EBO, VAO;
         void setupMesh();
 };
 

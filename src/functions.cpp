@@ -226,7 +226,8 @@ unsigned int loadTextureFromFile(char const * path)
     float maxAnisotropy = 0.0f;
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy);
     // 3. Apply it to the texture (usually 4.0f or 8.0f is perfect, or use the max)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
+    if (Settings::AnistrophicFiltering) glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
+    // glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
 
     return textureID;
 }

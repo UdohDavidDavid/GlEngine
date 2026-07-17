@@ -20,8 +20,9 @@ void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal;
-    // texCoord = aTexCoord;
-    texCoord = vec2(aTexCoord.y, 1.0 - aTexCoord.x);
+    texCoord = aTexCoord;
+    // texCoord = vec2(aTexCoord.y, 1.0 - aTexCoord.x);
+    // texCoord = vec2(aTexCoord.x, aTexCoord.y);
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 	// gl_Position = mvp * vec4(aPos, 1.0);
 }

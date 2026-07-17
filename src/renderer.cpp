@@ -16,6 +16,7 @@ bool Renderer::init()
         return false;
     }
     glEnable(GL_DEPTH_TEST);  // Enable depth buffer
+    glDepthFunc(GL_LESS);
     if (Settings::MSAASamples) glEnable(GL_MULTISAMPLE);
 
     isInitialized = true;
@@ -28,5 +29,14 @@ void Renderer::draw(float *background)
     glClearColor(this->background[0], this->background[1], this->background[2], 1.0f);
     // glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (Settings::wireFrame)  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // (Settings::wireFrame) ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_POLYGON_SMOOTH, GL_FILL);
+    if (Settings::wireFrame)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_POLYGON_SMOOTH, GL_FILL);
+    }
+    if (Settings::MSAASamples) glEnable(GL_MULTISAMPLE);
 }

@@ -147,6 +147,22 @@ build CMakeFiles/main.dir/window.cpp.o: CXX_COMPILER__main_unscanned_ /home/davi
   OBJECT_FILE_DIR = CMakeFiles/main.dir
   TARGET_SUPPORT_DIR = CMakeFiles/main.dir
 
+build CMakeFiles/main.dir/sphere.cpp.o: CXX_COMPILER__main_unscanned_ /home/david/c++/opengl/opengl/src/sphere.cpp || cmake_object_order_depends_target_main
+  DEP_FILE = CMakeFiles/main.dir/sphere.cpp.o.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -I/home/david/c++/opengl/opengl/src/include -I/home/david/c++/opengl/opengl/src/../include -I/home/david/c++/opengl/opengl/src/../include/glm -I/home/david/c++/opengl/opengl/src/../include/glm/gtc -I/home/david/c++/opengl/opengl/src/../include/glad -I/home/david/c++/opengl/opengl/src/imgui -I/home/david/c++/opengl/opengl/src/imgizmo
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir
+  TARGET_SUPPORT_DIR = CMakeFiles/main.dir
+
+build CMakeFiles/main.dir/model.cpp.o: CXX_COMPILER__main_unscanned_ /home/david/c++/opengl/opengl/src/model.cpp || cmake_object_order_depends_target_main
+  DEP_FILE = CMakeFiles/main.dir/model.cpp.o.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -I/home/david/c++/opengl/opengl/src/include -I/home/david/c++/opengl/opengl/src/../include -I/home/david/c++/opengl/opengl/src/../include/glm -I/home/david/c++/opengl/opengl/src/../include/glm/gtc -I/home/david/c++/opengl/opengl/src/../include/glad -I/home/david/c++/opengl/opengl/src/imgui -I/home/david/c++/opengl/opengl/src/imgizmo
+  OBJECT_DIR = CMakeFiles/main.dir
+  OBJECT_FILE_DIR = CMakeFiles/main.dir
+  TARGET_SUPPORT_DIR = CMakeFiles/main.dir
+
 build CMakeFiles/main.dir/imgui/imgui.cpp.o: CXX_COMPILER__main_unscanned_ /home/david/c++/opengl/opengl/src/imgui/imgui.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles/main.dir/imgui/imgui.cpp.o.d
   FLAGS = -std=gnu++17
@@ -219,10 +235,10 @@ build CMakeFiles/main.dir/imgizmo/ImGuizmo.cpp.o: CXX_COMPILER__main_unscanned_ 
 #############################################
 # Link the executable main
 
-build main: CXX_EXECUTABLE_LINKER__main_ CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/glad.c.o CMakeFiles/main.dir/stb_image.cpp.o CMakeFiles/main.dir/functions.cpp.o CMakeFiles/main.dir/light.cpp.o CMakeFiles/main.dir/mesh.cpp.o CMakeFiles/main.dir/renderer.cpp.o CMakeFiles/main.dir/shaders.cpp.o CMakeFiles/main.dir/textures.cpp.o CMakeFiles/main.dir/vao.cpp.o CMakeFiles/main.dir/vbo.cpp.o CMakeFiles/main.dir/camera.cpp.o CMakeFiles/main.dir/window.cpp.o CMakeFiles/main.dir/imgui/imgui.cpp.o CMakeFiles/main.dir/imgui/imgui_draw.cpp.o CMakeFiles/main.dir/imgui/imgui_widgets.cpp.o CMakeFiles/main.dir/imgui/imgui_tables.cpp.o CMakeFiles/main.dir/imgui/imgui_demo.cpp.o CMakeFiles/main.dir/imgui/imgui_impl_glfw.cpp.o CMakeFiles/main.dir/imgui/imgui_impl_opengl3.cpp.o CMakeFiles/main.dir/imgizmo/ImGuizmo.cpp.o
+build main: CXX_EXECUTABLE_LINKER__main_ CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/glad.c.o CMakeFiles/main.dir/stb_image.cpp.o CMakeFiles/main.dir/functions.cpp.o CMakeFiles/main.dir/light.cpp.o CMakeFiles/main.dir/mesh.cpp.o CMakeFiles/main.dir/renderer.cpp.o CMakeFiles/main.dir/shaders.cpp.o CMakeFiles/main.dir/textures.cpp.o CMakeFiles/main.dir/vao.cpp.o CMakeFiles/main.dir/vbo.cpp.o CMakeFiles/main.dir/camera.cpp.o CMakeFiles/main.dir/window.cpp.o CMakeFiles/main.dir/sphere.cpp.o CMakeFiles/main.dir/model.cpp.o CMakeFiles/main.dir/imgui/imgui.cpp.o CMakeFiles/main.dir/imgui/imgui_draw.cpp.o CMakeFiles/main.dir/imgui/imgui_widgets.cpp.o CMakeFiles/main.dir/imgui/imgui_tables.cpp.o CMakeFiles/main.dir/imgui/imgui_demo.cpp.o CMakeFiles/main.dir/imgui/imgui_impl_glfw.cpp.o CMakeFiles/main.dir/imgui/imgui_impl_opengl3.cpp.o CMakeFiles/main.dir/imgizmo/ImGuizmo.cpp.o
   DEP_FILE = CMakeFiles/main.dir/link.d
   LINK_FLAGS = -Wl,--dependency-file=CMakeFiles/main.dir/link.d
-  LINK_LIBRARIES = -lGL  -lglfw  -ldl
+  LINK_LIBRARIES = -lGL  -lglfw  -ldl  -lassimp
   OBJECT_DIR = CMakeFiles/main.dir
   POST_BUILD = cd /home/david/c++/opengl/opengl/src/build && /usr/bin/cmake -E copy_directory /home/david/c++/opengl/opengl/src/shaders /home/david/c++/opengl/opengl/src/build/shaders && /usr/bin/cmake -E copy_directory /home/david/c++/opengl/opengl/src/images /home/david/c++/opengl/opengl/src/build/images
   PRE_LINK = :

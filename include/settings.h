@@ -16,8 +16,9 @@ namespace Settings
     inline bool AnistrophicFiltering         = true;
     inline float AmbienceIntensity           = 0.1f;
     inline float DiffuseIntensity            = 0.5f;
+    inline float SpecularIntensity           = 1.0f;
     inline bool wireFrame                    = false;
-    inline float background[]                = {0.0f, 0.0f, 0.0f};
+    inline float background[]                = {0.098f, 0.098f, 0.098f};
 
     // Camera Settings;
     inline constexpr float YAW               = -90.0f;

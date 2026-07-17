@@ -38,6 +38,7 @@ class Dirlight
 
         glm::vec3 diffuseColor;
         glm::vec3 ambientColor;
+        glm::vec3 specular;
 
         Dirlight(glm::vec3 color, glm::vec3 direction);
         void update_uniforms(Shader &shader);
