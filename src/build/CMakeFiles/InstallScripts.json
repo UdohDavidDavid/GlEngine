@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/david/c++/opengl/opengl/src/build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

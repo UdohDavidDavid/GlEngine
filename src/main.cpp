@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
   Sphere sphereMesh(glm::vec3(0.0f, 0.0f, 0.0f), 0.6f, 36.0f, 18.0f);
   Sphere worldMesh(glm::vec3(0.0f, 0.0f, 0.0f), 0.6f, 36.0f, 18.0f);
 
-  Model ourModel("../backpack/backpack.obj");
+  Model ourModel("../src/backpack/backpack.obj");
 
   float deltaTime = 0.0f; // Time between current frame and last frame
   float lastFrame = 0.0f; // Time of last frame
